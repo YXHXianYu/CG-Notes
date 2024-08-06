@@ -293,6 +293,7 @@
   * 基本思想：使用轻量神经网络拟合、存储场景各点辐射场信息
   * 【感觉这个方法类似于基函数拟合光场？】
 * 重要性重采样（RIS）
+  * 【TODO】
 
 ### 5. 光线求交加速和GPU光追
 
@@ -306,4 +307,61 @@
 * 工程上高效，需要注意：访存一致性、etc
 
 ### 6. 未来展望
+
+## Day1.5 腾讯：实战中的实时渲染
+
+> 袁亚振
+
+* 项目vs研究
+  * 项目短板不能太短
+  * PPT、源码是否能快速复现
+  * 方案是否Production Proven
+
+* 全动飞行模拟项目
+* FSR2
+  * MSAA GBuffer
+  * 通过直接MSAA GBuffer，使得不用增加采样次数就可以增加分辨率
+* 光照烘焙
+  * 预处理
+  * 三种技术路线
+    * Irradiance + Lightmap => 静态物体 + 静态光源
+    * Irradiance + Light Probe => 动态物体 + 静态光源
+    * PRT + Light Probe => 动态物体 + 动态光源
+  * 挑战：困难路径采样，即间接光采样
+    * Practical Path Guiding
+  * 挑战：超大规模光源
+  * 挑战：超大规模场景
+* ![](./Notes/tencent1.jpg)
+* ![](./Notes/tencent2.jpg)
+* ![](./Notes/tencent3.jpg)
+* ![](./Notes/tencent4.jpg)
+* ![](./Notes/tencent5.jpg)
+* etc（略）
+
+## Day1.6 网易：游戏资产的智能创建 (3D AIGC)
+
+> 网易伏羲 李林橙
+
+### 1. 角色
+
+* 捏脸系统
+  * 自动化捏脸（输入图像；输出参数）
+* text-to-character
+  * toB：提高开发效率
+  * toC：玩家自定义
+* text-to-others (clothes, hair)
+* 交互式多轮角色创建
+  * 论文名为：ICE
+  * 这个帅！
+
+### 2. 场景
+
+* text-to-model
+* text-to-scene
+* fonts generation
+* ...
+
+### 3. 招聘
+
+* ![](./Notes/net1.jpg)
 
