@@ -93,7 +93,8 @@
   * 直接光照：Phong模型
   * 全局光照
     * 困难：无解析解、复杂度高
-    * 求解方法：Monte Carlo、有限元方法（Radiosity，PBGI）【学一下】
+    * 求解方法：Monte Carlo、有限元方法（Radiosity，PBGI）
+      * 【学一下，有限元方法】
     * MIS和RIS
       * MIS：多重重要性采样
       * RIS：俄罗斯轮盘和分裂
@@ -383,6 +384,8 @@
 ## Day2.1 离线渲染2：真实感材质建模
 
 > 王贝贝
+>
+> 讲课讲的很好
 
 * 大纲
   * 材质建模基本
@@ -540,6 +543,27 @@
 * 未来展望
   * AI<->GI
   * 王希老师认为用AI做rendering非常有潜力，围绕人的perception做
+* 王希老师面对面交流
+  * Nanite相关的
+    * 目前问题主要在带宽上，而不在渲染上
+
+  * 游戏引擎中的脚本技术选型
+    * 一个open question
+    * python和lua各有优势
+    * luau是lua的强类型拓展，lua jit可以加速lua运行效率
+    * 网易正在转向用python（但王希老师觉得python太重量化了）
+    * C#也有优势，但劣势是跨平台支持
+
+  * 游戏引擎中的ECS和GameObject技术选型
+    * 一个open question
+    * 目前unity和unreal5的架构实际上都是十几年前的架构
+      * 只是增加了一些新的feature（比如DOTS等），多开了几个线程用于专门支持新feature
+
+    * 移动端，带宽问题比较大，所以有Tile-based Rendering
+    * Unity和Unreal
+      * 大厂，Unity通常是买源码，然后直接找一批引擎精锐去魔改Unity核心
+      * Unreal因为是native c++的，所以大家也在改，但特别容易崩溃
+
 
 ## Day2.3 光线云：云原生实时渲染引擎 (RaysEngine)
 
@@ -570,21 +594,129 @@
 * RaysTools：光学仿真（透镜etc）
 * ![](./Notes/rayse3.jpg)
 
-## Day2.4
+## Day2.4 实时渲染1：GPU与渲染管线
 
+> 王锐
 
+* 渲染方程
+  * PT、有限元
+  * Local Shading
+* 渲染管线
+  * 固定管线 (OpenGL 1.0)
+    * MT, Illumination (早期管线), VT, Clipping, PT, Rasterization, Visibility/Display
+  * 可编程管线 (OpenGL 2.0)
+    * etc
+  * 更多特性 (OpenGL 3.2)
+    * Geometry Shader, Tessellation, Compute Shader, etc
+    * Mesh Shader
+* Graphics APIs
+  * ![](./Notes/rtr1.jpg)
+* Shading Languages
+  * HLSL (Microsoft)
+  * GLSL (OpenGL / Vulkan)
+  * MSL (Metal)
+  * WGSL (WebGPU)
+  * SPIR-V，中间格式(字节码)
+  * ![](./Notes/rtr2.jpg)
+* GPU Ray Tracing
+  * OptiX
+* Conclusion
 
+## Day2.5 实时渲染2：实时渲染方法
 
+> 王璐 山东大学
+>
+> 讲课讲的还是很清楚的
 
+* RTR's Goal: Real-Time + High Quality
 
+### 1. Shadow Mapping
 
+* 常用SM算法有：SM、PCSS、VSSM、DFSS
+* （感觉内容是RTR的子集）
+* DFSS
+  * 从着色点向光源ray marching，通过SDF加速，并得到一个最大角度，表示遮挡率，从而得到软阴影
+* Shadowing in Unreal Engine
+  * SM
+  * Virtual Shadow Map (GPU-driven high-resolution shadow map)
+  * DFSS
+  * etc
 
+### 2. 3D Space GI
 
+* PRT
+  * 预计算lighting项与light transport项，用基函数(SH, Wavelet, SG)储存下来
+* Voxel-based GI (VXGI)
+* Light Map
+* Light Probe (Precomputed or Runtime)
+* DDGI (Diffuse x GI)
+* AMDGI (添加了Glossy材质)
 
+### 3. Screen Space GI
 
+* SSAO
+* SSR
 
+### 4. Real-time Ray Tracing
 
+### 5. Our Work
 
+* 用Neural Basis作为基函数
+* Stereo-consistent SSR
+  * 在VR中的SSR，两个眼睛看到的效果不同，论文提出了一个解决方案
+* Temporally Reliable Motion Vectors for RTRT
+  * 提出了一些新的Motion Vectors
 
+### 6. Future Research
 
+* 王璐老师锐评：全是未来工作，有好多可以做的
+* Complex Geometry，对大规模场景/几何做快速操作
+* Complex Material
+* Complex Light
+* Volumes
+* Denoising
+* VR Rendering：Perceptual models & Foveated Rendering；Stereo Consistency
+* Mobile Rendering
+* [博客](https://wanglusdu.github.io)
 
+## 7. 元象：
+
+> 朱
+>
+> 也拿过acm金
+
+### 7.1 LBVR概念简介
+
+* LBVR：Location-Based Virtual Reality
+  * 基于位置的虚拟现实（大空间VR）
+* 元象首个LBVR项目：幻旅之门
+* 技术选型
+  * 常见VR设备
+    * PICO & Quest：安卓、虚幻
+    * Apple Vision Pro：VisionOS、闭源
+  * 使用Quest3 & 虚幻
+
+### 7.2 VR端
+
+* VR对性能要求高
+  * VR如果只有几帧，可能带上去就会头晕呕吐
+* 插帧
+  * Meta官方提供的插帧工具 —— Application SpaceWarp (ASW)
+  * Meta官方给Unreal写了插件，直接用就好
+* 模型减面（曲面简化）
+  * 元象主要使用QEM算法
+  * ![](./Notes/yx1.jpg)
+  * 什么时候停止减面？
+    * 豪斯多夫距离
+    * 剪影Loss
+* Mindtopia 已上线 Apple Vision Pro
+* 动画
+  * 手K动作
+  * 视频动捕
+  * 专业动捕
+* PSO
+  * 团队研究了一下如何在虚幻引擎中打包PSO，减少加载时间
+* 全景双目视频的压缩方法
+  * MV-HEVC
+
+### 7.3 总结
