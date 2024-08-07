@@ -510,7 +510,71 @@
 * ![](./Notes/material1.jpg)
 * 王贝贝老师是科研仙人
 * 论文：From microfacets to participating media: A unified theory of light transport with stochastic geometry. Siggraph 2024 (Best paper)
-* 
+
+## Day2.2 不鸣科技：当代游戏引擎的光照和几何处理前沿技术
+
+> 王希
+
+* 渲染方程
+* 全局光照方法
+  * RSM
+  * LPV：空间体素化
+  * SVOGI：用 数据结构 维护体素
+  * VXGI：根据 距离 决定体素密度
+  * SSGI：屏幕空间 + RT
+* Lumen
+  * 问题：GI需要过多ray
+    * 思路：减少ray的数量
+    * 方法：空间体素储存光照 + 屏幕空间Probe
+  * 问题：远距离储存光照
+    * 思路：通过各类方法if else结合在一起
+    * 方法：World Space Radiance Cache
+  * 问题：各类方法混合时会产生artifact
+* ReSTIR (Reservoir-based Spatio-Temporal Importance Resampling)
+  * 特点：基于GPU RT；简单实现；数千光源
+  * 思路：通过高频BRDF采样 + 低频Visibility采样，混合得到一个数学上等价的采样
+  * 思路2：RIS，复用周围的(Neighbour)光线和上一帧(Temporal)的光线
+    * 【不知道这两个的关系】
+  * 实例：cbpk2077, chaos引擎
+* Nanite：略
+* 未来展望
+  * AI<->GI
+  * 王希老师认为用AI做rendering非常有潜力，围绕人的perception做
+
+## Day2.3 光线云：云原生实时渲染引擎 (RaysEngine)
+
+> 王锐
+
+### 1. 公司概述
+
+* 美国限制认证
+
+### 2. 技术背景
+
+* ![](./Notes/rayse1.jpg)
+* 视觉是主要信息输入
+* RaysEngine，关注点为：云渲染
+
+### 3. 引擎介绍
+
+* Rays Engine
+* Rays Editor
+* ![](./Notes/rayse2.jpg)
+  * (3) 自优化渲染计算框架：游戏做完可以丢进去自动化评估/优化
+* 公司也在做科研，发了很多paper
+* RaysEngine引擎与许多国产GPU、CPU、OS做了兼容
+  * 国产GPU落后的其中一个原因就是 Graphics API 驱动太难写了
+
+### 4. 产品服务
+
+* RaysTools：光学仿真（透镜etc）
+* ![](./Notes/rayse3.jpg)
+
+## Day2.4
+
+
+
+
 
 
 
