@@ -720,3 +720,210 @@
   * MV-HEVC
 
 ### 7.3 总结
+
+***
+
+## Day3.1 神经渲染1：机器学习 + 图形绘制
+
+> ZJU 霍宇驰
+
+* 知识驱动 vs. 数据驱动
+* Neural Rendering
+* AI应用：Scene、GI
+
+### 1. Scene
+
+* 【能不能把mesh改成可微的？】
+* Voxel-based Scene Representation
+* Mesh-based Scene Representation
+* Point-based Scene Representation
+  * 3DGS
+* Network-based Scene Representation
+  * NeRF
+* ![](./Notes/nr1.jpg)
+
+### 2. Global Illumination
+
+* AO
+  * DeepAO，用深度网络做SSAO
+* Direct Illumination
+* Indirect Illumination
+* Volume and Subsurface
+* Human-related Rendering
+
+### 3. Global Neural Rendering
+
+1. Object-Oriented Pipeline (TOG23)
+   * NeLT: NeuralLightTransfer
+   * 神经绘制流程：添加物体并根据物体修改光照
+   * Advanced: Material, Caustics, Transmission
+2. Light-Oriented Pipeline (TOG24)
+   * LightFormer
+3. Image-Oriented Pipeline
+* GNR Pipeline
+
+### 4. Post-processing
+
+* 对光追结果降噪
+  * 图像域降噪
+  * 路径域降噪
+* 改进采样策略
+  * 神经采样函数
+  * 强化学习引导
+* 多估计器混合
+  * 问题：降噪器有偏，无法确保spp增加时，画面的细节会增加。（光追失去一致性）
+  * 解决方案：将传统PT看做一个无偏估计器，降噪器看做一个有偏估计器
+    * 当spp低时，有偏估计器权重高；当spp高时，无偏估计器权重高
+* 时空样本重用
+* 帧预测
+  * 插帧：ExtraNet（Jie Guo et al. ACM TOG 2021!)
+* 神经超分辨率
+  * Neural SuperSampling for Real-time Rendering (TOG2020)
+  * DLSS (NVIDIA)
+  * FidelityFX (AMD)
+
+## Day 3.2 神经渲染2：NeRF与3DGS 从隐式到显式
+
+> THU 于涛
+>
+> 讲课讲得不错
+
+* 目的：介绍NeRF和3DGS的基本原理
+  * 是好的
+
+### 1. NeRF 神经辐射场
+
+* 应用
+  * 宏观，场景光场重建
+  * 远观，黑洞光场重建
+  * 微观，显微光场重建（对细胞和组织进行重建）
+* 本质上：通过多视角照片对光场进行重建
+
+#### 1.1 光场的表征和光场重建
+
+* 全光函数
+  * 定义：描述空间中任意一点 光的分布函数
+    * 即 $L(x, y, z, \phi, \theta, \lambda, t)$
+    * $x, y, z$ 采样点坐标；$\phi, \theta$ 观察采样点的角度；$\lambda$ 波长；$t$ 时间
+* 光场
+  * 定义：空间中光线集合的完备表示（全光函数），采集并显示光场，就能在视觉上重现真实世界
+  * 特性：不考虑场景的几何、材质
+  * 物理理解：光线与场景中的几何、材质经过复杂光线传播后形成的结果
+* 成像（Imaging）
+  * 传统定义：反向跟踪每个像素的光线与场景的交互
+  * 【锐评，课程安排不错，但xxx】
+  * NeRF定义：从某一个角度对光场进行采样得到图像的过程
+* 光场重建（新视点合成）
+  * 目标：从有限的、离散的、多视角的图像中，重建空间连续的光场（得到全光函数）
+  * 流程：输入图像，光场重建，新视角渲染
+
+#### 1.2 神经辐射场
+
+* 定义
+  * 神经 -> 神经网络
+  * 辐射场 -> 空间辐射场（光场）
+* 初始的NeRF研究 $f(x, y, z, \theta, \phi) = \lambda = (r, g, b, \sigma)$
+  * $\sigma$ 密度值（比如空气 $\sigma = 0$；非透明物体 $\sigma = 1$）
+    * 【密度值为什么不叫透明度？】
+  * 通过MLP来拟合光场函数
+* 基于NN的二维图像表征
+  * 基于NN的表征，可以表示连续的信号！
+  * ![](./Notes/nr2.jpg)
+* 基于NN的三维形状表征
+  * 实例：DeepSDF：$(x, y, z) \rightarrow distance$
+  * 优点：不需要显式存储稠密离散信息，可大幅节省占用空间
+    * 传统：存每个像素
+    * 基于NN：存NN拟合函数
+* NeRF：用MLP表征高维辐射场
+  * 问题：有了NeRF之后，如何得到指定视点的图像
+  * 可能的方案一：直接从新视点发一条射线对光场做积分？
+    * 不合理，因为没法考虑遮挡
+  * 引入：Volume Rendering
+    * ![](./Notes/nr3.jpg)
+    * ![](./Notes/nr4.jpg)
+    * NeRF的两次采样
+      * 粗采样：先求出大概低透过率的分布
+      * 精采样：根据分布进行精采样
+      * 【这部分有点没懂】
+  * 优化 = 重建，拟合已有视点的数据即可
+* 【好奇，NeRF每张不同图片是完全从零开始训吗？还是比如可以先训一个基础模型，再去微调？】
+  * 肯定有相关工作了（可泛化性）
+
+#### 1.3 相关工作
+
+* NeRF in the Wild：加入了时间轴
+* Block-NeRF：对街区等大场景进行重建
+* Mixture of Volumetric Primitives
+* InstantNGP：提升NeRF渲染速度
+* Neuralangelo (Meta)：通过NeRF重建几何
+
+### 2. 3DGS 三维高斯溅射
+
+* 相比NeRF：速度更快、效果更好；显式存储
+
+* ![](./Notes/nr5.jpg)
+
+* 3DGS Pipeline
+
+  * ![](./Notes/nr6.jpg)
+
+* 每个3D Gaussian有 **四个属性**
+
+  * 位置（3D高斯的均值）
+  * 协方差矩阵（决定3D高斯的形状）
+  * 不透明度：用于Splatting
+  * SH：描述3D高斯从各方向观察时的颜色
+  * ![](./Notes/nr8.jpg)
+  * ![](./Notes/nr9.jpg)
+    * 这里就是做了一些数学变换，使得优化结果合法
+  * 3D高斯通常选用4阶的SH
+    * 为什么用这么低阶的呢？
+      * 回答1：通常空间中diffuse物体，不同视角颜色相近
+      * 回答2：如何阶数太大，训练和优化会非常困难
+        * 3DGS源码里，会先对低阶SH进行优化，再对高阶SH进行优化
+        * 【Course to fun，这句话是什么意思，词可能拼错】
+
+* 3DGS的初始化
+
+  * 基于 **SfM稀疏点云** 初始化3D高斯
+
+* 3DGS的投影
+
+  * Splatting：将3DG的协方差矩阵进行投影，得到每个3DG对应的二维椭圆
+
+* 3DGS的Rasterizer
+
+  * Tile-based Rasterizer：先把整个图像分成很多Tile（如按16*16像素划分）
+  * ![](./Notes/nr10.jpg)
+  * ![](./Notes/nr11.jpg)
+  * ![](./Notes/nr12.jpg)
+  * 【这一步用tile和数据结构，实际上是为了优化时间复杂度？】
+    * 应该是的
+  * 每个Tile直接并行渲染，所以3DGS跑得非常快
+
+* 为什么3DGS这么快？
+
+* CUDA简介编程
+
+  * 内存
+    * Global Memory <-> 显存
+    * Shared Memory <-> Thread Block的内存
+
+  * 【3DGS的特殊算法是针对CUDA优化的吗？】
+
+  * 3DGS和CUDA
+    * Thread Block中每个Thread先一起去读取Tile所需的3DG
+    * 然后每个Thread再分别计算每个pixel的颜色，直接从shared memory读取即可
+    * 优点：提高 **带宽** 利用率
+
+* 3DGS的优化
+  * Loss Function为渲染图像和真实图像的差异
+  * 优化器为Adam
+* 前沿方向
+  * 在NeRF上能做的改进，在3DGS也可以再做一下
+  * 4DGS：加入时间
+  * 4K4D
+  * 3DGS + Diffusion Model
+  * etc...
+* 实际业务需求
+  * ![](./Notes/nr20.jpg)
