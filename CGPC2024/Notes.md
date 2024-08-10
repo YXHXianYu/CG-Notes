@@ -679,13 +679,13 @@
 * Mobile Rendering
 * [博客](https://wanglusdu.github.io)
 
-## 7. 元象：
+## Day2.6 元象：
 
 > 朱
 >
 > 也拿过acm金
 
-### 7.1 LBVR概念简介
+### 1. LBVR概念简介
 
 * LBVR：Location-Based Virtual Reality
   * 基于位置的虚拟现实（大空间VR）
@@ -696,7 +696,7 @@
     * Apple Vision Pro：VisionOS、闭源
   * 使用Quest3 & 虚幻
 
-### 7.2 VR端
+### 2. VR端
 
 * VR对性能要求高
   * VR如果只有几帧，可能带上去就会头晕呕吐
@@ -719,7 +719,7 @@
 * 全景双目视频的压缩方法
   * MV-HEVC
 
-### 7.3 总结
+### 3. 总结
 
 ***
 
@@ -786,7 +786,7 @@
 
 > THU 于涛
 >
-> 讲课讲得不错
+> 讲课讲得很好
 
 * 目的：介绍NeRF和3DGS的基本原理
   * 是好的
