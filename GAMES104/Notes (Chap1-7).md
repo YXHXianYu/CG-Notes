@@ -323,7 +323,7 @@
   * 一种特殊的Probe：Reflection Probe
     * 精度高，密度少
   * Light Probe + Reflection Probe
-    * Pros
+    * Pros 
       * Very efficient on runtime
       * Can be applied to both static and dynamic objects
       * Handle both diffuse and specular shading
@@ -710,6 +710,8 @@
 * 在V-Buffer中，储存几何信息，而不是材质信息
 * ![image-20240216224252227](./Notes/image-20240216224252227.png)
 * 在2022年初成为趋势，目前不了解
+* 解决的问题：GBuffer，带宽消耗太大，纹理采样overdraw太多
+* [额外参考资料](https://www.piccoloengine.com/topic/310642)
 
 ### 7.6 Real Rendering Pipeline
 

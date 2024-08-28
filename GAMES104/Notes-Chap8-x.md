@@ -153,6 +153,8 @@ Joint Pose的姿态
 * ABT是Layer ASM的超集，ABT是一个递归结构
 * 【TODO，第9集剩下的没看】
 
+***
+
 ## 10. Physics System - Basic Concepts
 
 * 两节课：基本概念 + 应用
@@ -236,12 +238,14 @@ Joint Pose的姿态
     * 如何求解闵科夫斯基差：**GJK Algorithm**，算法略，和单纯形有关
   * 方法三：Separating Axis Theorem (SAT)
     * 略
-    * 貌似和做cgpc题目的时候学到的SAT优点区别
+    * 貌似和做cgpc题目的时候学到的SAT有点区别
 
 ### 10.5 Collision Resolution
 
 * 如果两个物体碰撞了怎么办？
 * 方法一：Applying Penalty Force，给物体增加一个penalty force
+  * 问题：如果penalty force不正确的话，物体可能会突然起飞。这通常是一种比较劣的方法
+
 * 方法二：Solving Constraints，基于拉格朗日力学，将力学建模成约束问题
   * **目前物理引擎中最常用的方法：Gauss-Seidel Method 高斯塞德尔方法**
 
@@ -264,4 +268,160 @@ Joint Pose的姿态
   * 目的：确保 **相同的初始状态** 会得到 **同样的结果**
   * 要求：固定步长、确定的求解顺序、浮点数一致性
 
-## 11. 
+***
+
+## 11. Physics System - Application
+
+### 11.1 Character Controller
+
+* Character Controller vs. Rigid Body Dynamics
+  * 这两个是不同类的物体，就像Unity中的 `isKinematic`，是一个反物理的物体
+* 接下来介绍，**基本的Controller的需求**
+
+* 形状：Capsule
+  * 通常由两层Capsule组成，内部Collider专门负责碰撞，而外部Collider通常做保护作用（比如避免角色离墙太近，导致摄像机穿模）
+  * ![image-20240828154110413](./Notes-Chap8-x/image-20240828154110413.png)
+* 角色贴到墙壁时继续移动：![image-20240828154322540](./Notes-Chap8-x/image-20240828154322540.png)
+* 自动上台阶
+  * 实现：移动角色时，自动尝试将角色向上移动
+  * 王希老师故事：这种方法可能会产生问题，避免角色被卡到奇怪的屋顶上。之前在做Halo的时候，设计师就要求门需要设计的更大一些，避免被卡在门里
+* 自动上斜坡
+  * 通常会限制一个能爬的最大斜坡角度（Slope Limit）。超过的话，角色就会滑下来
+* Controller Volume Update
+  * 站立、蹲、爬，这三种姿态的Volume是不一样的，需要修改对应Collider
+* 推动其他物体
+* 站在移动的物体上：摩擦力、不连贯性
+  * 实现：用Raycast，绑定角色和其站立物体的位置关系（问题：台子突然加速，不应该绑定。所以需要hard code）
+
+### 11.2 Ragdoll 布娃娃
+
+* 角色死亡后，需要和环境做交互
+* 重点：关节限制
+* 在真实的游戏引擎中，会提供API，让技术美术对joint进行约束
+  * ![image-20240828155836583](./Notes-Chap8-x/image-20240828155836583.png)
+* Ragdoll到Skeleton，还需要做一个映射
+* 在实现的时候，需要从Kinematic到Dynamic做一个过渡
+  * ![image-20240828160341191](./Notes-Chap8-x/image-20240828160341191.png)
+  * ![image-20240828160348736](./Notes-Chap8-x/image-20240828160348736.png)
+* 问题：**动画和物理仿真的边界**
+  * 这两个可以做Blending，同时作用Animation和Ragdoll Physics
+  * **Powered Ragdoll**
+  * ![image-20240828160602510](./Notes-Chap8-x/image-20240828160602510.png)
+
+### 11.3 Clothing
+
+* 解决方案
+  * 动画：直接使用动画来表现衣料，和骨骼绑定。比如向左动，衣料骨骼就做对应动画
+  * Rigid Body-based Cloth Simulation
+  * Mesh-based Clothing Simulation
+* Mesh-based Clothing Simulation
+  1. 不能直接用Render Mesh，需要用专门的Physical Mesh
+     * ![image-20240828161138319](./Notes-Chap8-x/image-20240828161138319.png)
+  2. 给每个Mesh刷上约束权重。越靠近中心，约束越大，越不容易移动
+     * ![image-20240828161351171](./Notes-Chap8-x/image-20240828161351171.png)
+* 问题：衣料如何模拟？
+  * 常见的Cloth Solver有
+    * Mass-Spring System（经典力学）
+    * Position Based Dynamics（数学约束）：效率高、精确
+
+#### 11.3.1 Mass-Spring System 质点弹簧系统
+
+* ![image-20240828161757478](./Notes-Chap8-x/image-20240828161757478.png)
+* 弹簧除了水平/垂直弹簧以外，还需要交叉的弹簧，来提供更多的力
+* 对于每个顶点，需要作用与其相连的所有弹簧的力
+  * ![image-20240828162144868](./Notes-Chap8-x/image-20240828162144868.png)
+
+* 问题：如何解这个积分？【没怎么听懂】
+  * Verlet积分（一种半隐式欧拉积分的改进）
+
+#### 11.3.2 Position Based Dynamics (PBD)
+
+* GAMES104略
+
+#### 11.3.3 衣料模拟的其他问题
+
+* 多层布料的Self Collision
+
+  * ![image-20240828162743787](./Notes-Chap8-x/image-20240828162743787.png)
+
+  * 常用方法
+
+    1. 在物理模拟中加厚布料
+    2. 增加substeps
+    3. 限制最大速度，避免击穿
+    4. 在布料中施加力场
+
+    * ![image-20240828163019327](./Notes-Chap8-x/image-20240828163019327.png)
+    * ![image-20240828163025238](./Notes-Chap8-x/image-20240828163025238.png)
+
+### 11.4 Destruction 破坏系统
+
+* Super Mario、Rainbow Six Siege
+* 实现：**Chunk Hierarchy**
+  * ![image-20240828163501378](./Notes-Chap8-x/image-20240828163501378.png)
+  * 给每个chunk连接处设置硬度（hardness），如果Impluse超过硬度，就直接断裂
+  * *因为硬度在物理上没有意义，所以剩下的都是经验公式（hack），这里不再记录*
+* **Support Graph**
+  * 和世界（根节点）相连，如果与根节点不连通，则变成Dynamics物体
+* **如何构建Chunks？**
+  * 可以使用Voronoi Diagram：随机化选取点；构建Voronoi；构建Chunks
+  * ![image-20240828163955657](./Notes-Chap8-x/image-20240828163955657.png)
+* **3D物体断裂处的纹理怎么决定？**
+  * 方法一：3D Texture
+  * 方法二：预处理
+  * 等
+* 不同断裂的Pattern
+* 其他问题
+  * 太多碎片的性能问题
+
+### 11.5 Vehicle
+
+* 悬挂系统：汽车和轮胎之间用弹簧模拟
+* 动力：引擎生成扭矩
+* *略，这部分有需要再看吧。有需要的话，物理引擎都会有API*
+
+### 11.6 PBD/XPBD
+
+* 拉格朗日力学：用约束来表达运动，并求解约束得到运动结果
+* 例如：圆周运动
+  * 位置约束 + 速度约束：![image-20240828170108998](./Notes-Chap8-x/image-20240828170108998.png)
+    * 其中，速度约束，实际上就是一个雅可比矩阵
+* 例如：弹簧
+  * 也可以用约束来表达：![image-20240828170341640](./Notes-Chap8-x/image-20240828170341640.png)
+* **Position Based Dynamics (PBD) & XPBD (Extended)**
+  * *略，听不懂*
+
+### 11.7 Homework 3
+
+* 关于物理和动画
+
+### 11.8 Q&A
+
+* 音效系统和物理系统的关系
+  * 物理引擎提供Callback函数，可以调用音效系统
+  * 不一定一次Callback生成一次音效，可以每一帧把所有音效事件放进队列里
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
