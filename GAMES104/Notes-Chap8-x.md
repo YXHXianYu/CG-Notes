@@ -401,6 +401,79 @@ Joint Pose的姿态
   * 物理引擎提供Callback函数，可以调用音效系统
   * 不一定一次Callback生成一次音效，可以每一帧把所有音效事件放进队列里
 
+***
+
+## 12. Effects 粒子&音效
+
+### 12.1 Particle System 粒子系统
+
+* 基本属性：Position、Velocity、Size、Color、Shape、Lifetime
+* Particle Emitter
+* Particle System = 多个Emitter + 这些Emitter发射出的粒子
+  * ![image-20240829104630593](./Notes-Chap8-x/image-20240829104630593.png)
+* Spawn Position：single position、area、mesh
+* Simulation
+  * 目标：粒子在生成之后，需要模拟重力、阻力、风场、碰撞、etc
+* Type
+  * Billboard Particle：一个永远朝向摄像机的贴片
+  * Mesh Particle：每个particle都是一个mesh
+  * Ribbon Particle
+    * ![image-20240829105505585](./Notes-Chap8-x/image-20240829105505585.png)
+    * 生成时，通常会使用插值，来生成平滑的轨迹（比如Centripetal Catmull-Rom Interpolation）
+
+#### 12.1.1 Particle System Rendering
+
+* Alpha Blending Order，即透明物体
+  * 需要对particle进行排序
+  * 排序类型
+    * Global Sort
+    * Per Emitter Sort
+* 性能问题
+  * 透明物体会严重拖慢帧率
+  * 解决方案：Low-Resolution Particles
+    * 比如用1/4分辨率渲染透明物体
+
+#### 12.1.2 GPU Particle
+
+* 【略，跳过】
+
+#### 12.1.3 Advanced Particles
+
+* Crowd Simulation：用粒子模拟人、士兵等
+  * 用SDF来Navigation Particle
+  * 给Particle加入动画、状态机等等
+  * Particle和角色的交互（比如鸟群）
+* Unreal's Niagara System Design —— 目前最先进的Particle系统
+
+### 12.2 Sound System
+
+* Sound Pressure Level 声音大小：$L_p = 20log_{10}(\frac{p}{p_0})dB$
+* Pitch：音调
+* Timbre：音色
+* Pulse-code Modulation (PCM)
+  * 转换音频和声波的机器
+  * *细节略*
+* Audio Format
+  * ![image-20240829114019066](./Notes-Chap8-x/image-20240829114019066.png)
+  * ogg没有专利保护、开源，所以用的人越来越多
+* 3D Audio Rendering
+  * *细节略*
+  * Listener <-> Camera：位置、速度、朝向
+    * FPS游戏，Listener和Camera通常重合
+    * TPS游戏，Listener实际上会放在Camera和Character中间的某个点上，具体游戏不同
+  * Spatiallization 空间化
+    * 声音大小、左右耳时间差值（<10ms）
+    * *细节略*
+  * 具体来说非常复杂，有很多细节需要模拟
+  * 多普勒效应、回音、障碍物······
+  * 音效引擎/中间件：fmod、wwise
+
+***
+
+## 13. 工具链
+
+
+
 
 
 
