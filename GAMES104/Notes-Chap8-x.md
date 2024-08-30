@@ -472,7 +472,112 @@ Joint Pose的姿态
 
 ## 13. 工具链
 
+* ![image-20240830100434143](./Notes-Chap8-x/image-20240830100434143.png)
 
+### 13.1 Complicated Tool GUI
+
+* GUI Mode
+  * Immediate Mode：Unity、Piccolo
+  * Retained Mode：QT、Unreal
+    * 有一个UI框架专门维护UI元素
+
+#### 13.1.1 Design Pattern
+
+* MVC
+  * 在设计工具链的时候，需要考虑设计模式，例如MVC
+  * ![image-20240830101911178](./Notes-Chap8-x/image-20240830101911178.png)
+* MVP
+  * 可以这么理解：
+    * View <-> 前端
+    * Presenter <-> 后端
+    * Model <-> 数据库
+* MVVM
+  * 用ViewModel实现View和Model的绑定
+* 例子
+  * MVC：Django
+  * MVP：Android应用开发
+  * MVVM：Vue.js
+
+### 13.2 Load & Save
+
+* Serialization and Deserialization
+* 储存方式
+  * Text Files（TXT、Json）
+  * Binary Files
+* Asset Reference
+  * 通过reference引用各种数据
+* Data Inheritance
+  * 数据之间也可以继承，来减少数据冗余
+
+### 13.3 How to load data - Deserialization
+
+* 通常先读取元数据，再读取具体内容
+  * ![image-20240830153539452](./Notes-Chap8-x/image-20240830153539452.png)
+* 大端序 vs. 小端序
+  * 引擎跨平台的时候需要考虑这个问题，比如PlayStation貌似就和intel x86的端序不同
+* Asset Version Compatibility
+  * Solution 1: Version Hardcode（例如Unreal）
+    * ![image-20240830154504326](./Notes-Chap8-x/image-20240830154504326.png)
+  * Solution 2：Field UID（例如Google Protocol Buffers，即Protobuf）
+    * ![image-20240830154526670](./Notes-Chap8-x/image-20240830154526670.png)
+    * 对于一个struct/protocol来说，给每个field定义一个key
+
+### 13.4 How to Make a Robust Tools
+
+* 游戏引擎工具链对开发非常重要！如果工具链爆炸，那么一整个团队可能一个上午什么都做不了
+
+#### 13.4.1 Undo & Redo & Crash Recovery
+
+* 这些问题，可以使用 **Command Pattern** 这个设计模式解决
+  * 类似数据库
+* 定期将Command都存到磁盘上，支持Crash后回复和Undo
+* **最佳实践：做Tool Chain时，在最早期，就实现Command Pattern（操作的原子化）**
+* Command的定义
+  * ![image-20240830155256883](./Notes-Chap8-x/image-20240830155256883.png)
+  * Invoke <-> Do；Revoke <-> Undo；
+* 关键的Commands，以文本编辑器为例
+  * ![image-20240830155646323](./Notes-Chap8-x/image-20240830155646323.png)
+
+### 13.5 Tool Chain
+
+* Schema：定义、Inheritance、Refenrence
+* Schema的两个流派
+  * 用XML/Json等格式，解析成引擎code
+  * 直接用code和宏进行定义（比如Unreal）
+  * ![image-20240830160457964](./Notes-Chap8-x/image-20240830160457964.png)
+
+### 13.6 What You See is What You Get (WYSIWYG)
+
+* 两类Tool Layer
+  * Stand-alone Tools
+    * ![image-20240830161355549](./Notes-Chap8-x/image-20240830161355549.png)
+    * 可以独立运行
+  * In Game Tools
+    * ![image-20240830161413909](./Notes-Chap8-x/image-20240830161413909.png)
+    * Editor需要同时启动一个引擎runtime
+* Play In Editor（PIE）
+  * 可以在Editor中直接玩游戏
+  * 两类PIE
+    * Play In editor world
+      * ![image-20240830162035494](./Notes-Chap8-x/image-20240830162035494.png)
+    * Play in PIE world（例如Unreal）
+      * ![image-20240830162025712](./Notes-Chap8-x/image-20240830162025712.png)
+
+### 13.7 Plugins
+
+* 允许用户开发插件 —— **现代商业引擎最重要的特性**
+
+### 13.8 Q&A
+
+* 引擎工具链开发需要的能力
+  * 对软件架构、软件工程特别感兴趣。工具链最核心的是软件架构
+  * 熟悉策划和美术，真实地了解过他们需求
+* 工具链用Web前端做的多不多
+  * 2022未知
+
+***
+
+## 14. 工具链 - 高级
 
 
 
