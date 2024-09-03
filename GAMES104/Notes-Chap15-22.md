@@ -79,3 +79,67 @@
 * 游戏逻辑太混乱，所以用Event系统简化逻辑
 * 无法预先考虑所有逻辑，所以要开放scripting system
 * scripting太难上手，所以提供了visual scripting
+
+***
+
+## 16. Gameplay：Basic AI
+
+* Q&A环节：Event System通常会考虑events的优先级吗？
+  * 可以分队列。但是在观察者模式中，不推荐这么做，因为这会让event的耦合性变高，并且不利于并行化。
+
+* 【略！AI等以后有空再回来学吧！】
+
+***
+
+## 17. Gameplay: Advanced AI
+
+* 【略！AI等以后有空再回来学吧！】
+
+***
+
+## 18. Online Gaming Architecture: Fundamentals
+
+* Online Gaming的挑战
+  1. 一致性：网络同步
+  2. 可靠性：延迟、掉线重连
+  3. 安全性：作弊、账号安全性
+  4. 多样性：跨平台、热更新、不同类游戏
+  5. 复杂性：高并发、高可用、高性能
+
+### 18.1 Network Protocols
+
+* OSI Model & TCP/IP Model
+* Socket
+* Protocols：TCP（连接稳定、拥塞控制等）、UDP（Connectionless、不可靠、高效）
+  * ![image-20240903101528784](./Notes-Chap15-22/image-20240903101528784.png)
+
+### 18.2 Reliable UDP
+
+* 现代游戏引擎中，并不会直接用原生态的协议，而是会对协议做改造
+  * 例子：Overwatch基于UDP，实现了一个自己的稳定的、带有延迟补偿的协议
+* ACK、Negative ACK、SEQ、Timeouts
+* Automatic Repeat Request（ARQ）
+  * 使用一个滑动窗口来控制发包的数量
+  * Stop-and-Wait ARQ：Window size = 1
+  * Go-Back-N ARQ：窗口内丢包了，就重发整个窗口
+  * Selective Repeat ARQ：窗口内丢包了，就重发特定包
+* Forward Error Correction（FEC）
+  * 目标：丢包可以直接不管，不需要重发
+  * FEC方法
+    * XOR-FEC
+      * ![image-20240903102746429](./Notes-Chap15-22/image-20240903102746429.png)
+      * 通过多的异或冗余packet，来复原数据
+    * Reed-Solomon Codes
+      * *听起来类似CRC，但好像细节不太一样*
+* ![image-20240903103123793](./Notes-Chap15-22/image-20240903103123793.png)
+
+### 18.3 Clock Synchronization
+
+* Round-Trip Time（RTT）
+  * 一个packet来回的耗时
+  * RTT和Ping的不同：Ping是通过ICMP协议测量的，而RTT是应用层测量的
+* Network Time Protocol（NTP）
+  * 算法：估算出RTT，然后根据RTT来对齐时间
+  * ![image-20240903104352155](./Notes-Chap15-22/image-20240903104352155.png)
+  * 
+
