@@ -141,5 +141,121 @@
 * Network Time Protocol（NTP）
   * 算法：估算出RTT，然后根据RTT来对齐时间
   * ![image-20240903104352155](./Notes-Chap15-22/image-20240903104352155.png)
-  * 
+* **建立连接后，第一件事就是：校准时钟**
 
+### 18.4 RPC
+
+* 因为直接写Socket非常痛苦，细节很多（数据对齐、端序、类型定义），所以需要一个封装好的工具 —— **RPC**
+* ![image-20240905162729046](./Notes-Chap15-22/image-20240905162729046.png)
+* Interface Definition Language（IDL）
+  * 例子：Google ProtoBuf
+* RPC Stubs（RPC存根）
+  * *没这么理解*
+* ![image-20240905163511933](./Notes-Chap15-22/image-20240905163511933.png)
+
+### 18.5 网络架构
+
+* 略
+
+***
+
+## 19. 网络游戏的进阶架构
+
+* 略
+
+***
+
+## 20. Data-Oriented Programming & Job System
+
+### 20.1 Basics
+
+* 略，操作系统学过了
+
+### 20.2 Parallel Framework
+
+* Framework Type
+  * Fixed Multi-thread
+    * One fixed thread for each part of module (render, logic, etc)
+    * 问题：木桶效应
+  * Fork-Join
+    * 预先申请一些work thread，专门处理一些需要大量重复计算的任务
+  * Unreal Parallel Framework
+    * 两类Thread：Named Thread、Worker Thread，分别处理特定模块和大量计算任务
+  * Task Graph
+    * 将Task和它们的Dependency建成图，然后多线程处理
+  * Coroutine
+    * 一个轻量化的多线程框架：一个任务执行一半时，可以让步给其他任务
+    * 问题：C++没有
+    * ![image-20240905172332782](./Notes-Chap15-22/image-20240905172332782.png)
+    * Coroutine Type
+      * Stackful Coroutine
+      * Stackless Coroutine
+      * 【没理解透】
+  * Fiber-based Job System
+    * *略*
+  * Job System
+    * *略*
+
+### 20.3 Programming Paradigm 编程范式
+
+* Procedural Oriented Programming，POP
+
+* Object-Oriented Programming，OOP
+  * Problem
+    1. ![image-20240905173329725](./Notes-Chap15-22/image-20240905173329725.png)
+    2. 继承树过于复杂，不确定方法具体在哪个父类中实现
+    3. 基类过于复杂（比如Unreal的UObject就复杂至极）
+    4. 性能差
+    5. 可测试性，OOP的单元测试较难编写
+  
+* Data-Oriented Programming，DOP
+
+  * Cache友好
+    * *略，已经会了*
+  * SIMD
+    * 设计数据结构的时候，尽量设计可以被SIMD优化的
+  * Cache选择策略 —— LRU
+  * 目标：让代码和数据在内存中排列密集
+
+* Performance-Sensitive Programming
+
+  1. 减少顺序依赖性，例如下图
+
+     * ![image-20240905174243991](./Notes-Chap15-22/image-20240905174243991.png)
+
+  2. False Sharing in Cache Line
+
+     * 避免两个thread读取同一个cache line，否则会导致CPU要处理cache数据不一致，从而性能降低
+
+  3. Branch Prediction 分支预测
+
+     * CPU会预测分支，将分支的代码直接读入到L1 Cache中，进行加速
+
+     * 所以如果分支执行连续的话，性能会更高
+
+  4. Reducing Memory Dependency 减少内存依赖
+
+     * Array of Structure vs. Structure of Array (AOS vs. SOA)
+     * 性能SOA会更高，因为内存排列更紧密，可以SIMD优化
+
+* Entity Component System（ECS）
+
+### 20.4 Unity DOTS
+
+* Unity DOTS（Data-Oriented Tech Stack）
+  * ECS + C# Job System + Burst Compiler
+* Archetype
+  * Archetype指一类Component相同的Entity
+* Data Layout in Archetype
+  * ![image-20240905182348996](./Notes-Chap15-22/image-20240905182348996.png)
+* System
+  * ![image-20240905182548654](./Notes-Chap15-22/image-20240905182548654.png)
+
+### 20.5 Unreal Mass Framework
+
+* ![image-20240905182938751](./Notes-Chap15-22/image-20240905182938751.png)
+* 在Unreal中
+  * Entity <-> Entity
+  * Fragment <-> Component
+  * Processor <-> System
+  * Unreal和Unity一样，也有Archetype
